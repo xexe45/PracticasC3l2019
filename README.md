@@ -2,3 +2,7 @@
 ```
 git clone https://github.com/xexe45/PracticasC3l2019.git
 ```
+
+```
+composer install
+```
