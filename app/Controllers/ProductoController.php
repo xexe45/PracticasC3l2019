@@ -2,13 +2,13 @@
 
 require '../bootstrap.php';
 
-use App\Models\Producto;
+use App\Models\QueryBuilder;
 
 if( isset($_GET['op']) ){
 
     switch ($_GET['op']) {
         case 'all':
-            $productos = Producto::all();
+            $productos = QueryBuilder::factory()->table('producto')->all();
             echo json_encode($productos);
         break;
         
