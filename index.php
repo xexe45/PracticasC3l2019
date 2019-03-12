@@ -35,6 +35,7 @@
                 <div class="card">
                     <div class="card-body">
                         This is some text within a card body.
+                        <button type="button" id="crear" class="btn btn-primary">Crear Producto</button>
                     </div>
                 </div>
             </div>
@@ -50,6 +51,7 @@
                                         <th>PRECIO VENTA</th>
                                         <th>PRECIO COMPRA</th>
                                         <th>STOCK</th>
+                                        <th>OPCIONES</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -67,6 +69,11 @@
     <script>
         $(function(){
             getProducts();
+            $('#crear').on('click', function(){
+                $.post('app/Controllers/ProductoController.php', {op: 'update'}, function(response){
+                    console.log(response);
+                },'json')
+            })
         });
 
         function getProducts(){
@@ -81,6 +88,8 @@
                     html += '<td>'+value['precio_venta']+'</td>';
                     html += '<td>'+value['pecio_compra']+'</td>';
                     html += '<td>'+value['stock']+'</td>';
+                    html += "<td><button onclick='editar("+value['id']+")' class='btn btn-info btn-sm'>Editar</button>";
+                    html += "<button onclick='borrar("+value['id']+")' class='btn btn-danger btn-sm'>Borrar</button></td>";
                     html += '</tr>';
                 });
 
@@ -88,6 +97,18 @@
 
 
             },'json')
+        }
+
+        function editar(id){
+            $.get('app/Controllers/ProductoController.php', {op: 'find', id:id}, function(response){
+                console.log(response);
+            }, 'json');
+        }
+
+        function borrar(id){
+            $.post('app/Controllers/ProductoController.php', {op: 'delete', id:id}, function(response){
+                console.log(response);
+            }, 'json');
         }
     </script>
 </body>

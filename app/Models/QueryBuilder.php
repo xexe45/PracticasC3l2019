@@ -22,7 +22,8 @@ class QueryBuilder {
         return $this;
     }
 
-    public function all(){
+    public function all()
+    {
         
         $conn = Conexion::getConnection();
         $stmt = $conn->prepare("SELECT * FROM {$this->table}");
@@ -34,30 +35,43 @@ class QueryBuilder {
         
     }
 
+    public function find($id)
+    {
+        $conn = Conexion::getConnection();
+        $stmt = $conn->prepare("SELECT * FROM {$this->table} WHERE id = ?");
+        $stmt->execute([$id]);
+        $data = $stmt->fetch();
+        $conn = null;
+        $stmt = null;
+        return $data;
+    }
+
     public function create($data)
     {
         $conn = Conexion::getConnection();
         
-        $count = count($data);
-        
         $attrs = [];
+        $values = [];
+        $keys = [];
         
-        for ($i=0; $i < $count; $i++) { 
+        foreach ($data as $key => $value) {
             $attrs[] = '?';
+            $values[] = $value;
+            $keys[] = $key;
         }
-
+        
         $desilachar = implode(",", $attrs);
+        $columns = implode(",",$keys);
 
-        $sql = "INSERT INTO {$this->table} VALUES({$desilachar})";
-
+        $sql = "INSERT INTO {$this->table} ({$columns}) VALUES({$desilachar})";
+    
         try{
 
-            $stmt = $conn->prepare($sql);
-            $stmt->execute($data);
+            $conn->prepare($sql)->execute($values);
             $id = $conn->lastInsertId();
 
         }catch( Exception $e ){
-
+            //echo $e->getMessage();
             $id = 0;
 
         }finally{
@@ -68,6 +82,56 @@ class QueryBuilder {
             
         }
     
+    }
+
+    public function update($id,$data)
+    {
+        $conn = Conexion::getConnection();
+        
+        $attrs = [];
+        $values = [];
+
+        foreach ($data as $key => $value) {
+            $attrs[] = "{$key} = ?";
+            $values[] = $value;
+        }
+        
+        $desilachar = implode(",", $attrs);
+
+        $sql = "UPDATE {$this->table} SET {$desilachar} WHERE id = ?";
+
+        array_push($values,$id);
+
+        $ok = false;
+        
+        try{
+
+            $conn->prepare($sql)->execute($values);
+            $ok = true;
+
+        }catch( Exception $e ){
+            //echo $e->getMessage();
+            $ok = false;
+
+        }finally{
+
+            $conn = null;
+            $stmt = null;
+            return $ok;
+            
+        }
+    
+    }
+
+    public function delete($id)
+    {
+        $conn = Conexion::getConnection();
+        $stmt = $conn->prepare("DELETE FROM {$this->table} WHERE id = ?");
+        $stmt->execute([$id]);
+        $deleted = $stmt->rowCount();
+        $conn = null;
+        $stmt = null;
+        return $deleted;
     }
 
 }
