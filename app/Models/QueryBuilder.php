@@ -34,4 +34,40 @@ class QueryBuilder {
         
     }
 
+    public function create($data)
+    {
+        $conn = Conexion::getConnection();
+        
+        $count = count($data);
+        
+        $attrs = [];
+        
+        for ($i=0; $i < $count; $i++) { 
+            $attrs[] = '?';
+        }
+
+        $desilachar = implode(",", $attrs);
+
+        $sql = "INSERT INTO {$this->table} VALUES({$desilachar})";
+
+        try{
+
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($data);
+            $id = $conn->lastInsertId();
+
+        }catch( Exception $e ){
+
+            $id = 0;
+
+        }finally{
+
+            $conn = null;
+            $stmt = null;
+            return $id;
+            
+        }
+    
+    }
+
 }
